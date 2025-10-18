@@ -16,7 +16,7 @@
 ⇓⇓⇓⇓
 <html>
   <body>
-<a herf=https://endroll2288-sys.github.io/RAID-LINE/>今直ぐ使用</a>
+<a href="https://endroll2288-sys.github.io/RAID-LINE/">今直ぐ使用</a>
   </body>
 </html>
 
