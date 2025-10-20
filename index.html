@@ -9,6 +9,7 @@
       font-family: sans-serif;
       text-align: center;
       margin-top: 40px;
+      background-color: #f5f7fa;
     }
     input, textarea {
       width: 80%;
@@ -16,11 +17,24 @@
       margin-bottom: 10px;
       padding: 8px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
       padding: 8px 16px;
       font-size: 16px;
       cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #5865F2;
+      color: white;
+    }
+    button:hover {
+      background-color: #4752C4;
+    }
+    hr {
+      margin: 20px auto;
+      width: 60%;
     }
   </style>
 </head>
@@ -32,43 +46,73 @@
   <br />
   <button id="saveWebhook">Webhookを保存</button>
 
-  <hr style="margin: 20px 0;">
+  <hr>
 
   <h3>メッセージ送信</h3>
-  <textarea id="message" rows="4" placeholder="送信したいメッセージ"></textarea>
+  <textarea id="message" rows="4" placeholder="送信したいメッセージを入力してください"></textarea>
   <br />
   <button id="sendBtn">送信</button>
 
   <script>
-    // ページ読み込み時に保存済みWebhookを読み込む
+    // ✅ 通知メッセージ表示関数
+    function showNotice(text, type = "success") {
+      const notice = document.createElement("div");
+      notice.textContent = text;
+      notice.style.position = "fixed";
+      notice.style.top = "20px";
+      notice.style.left = "50%";
+      notice.style.transform = "translateX(-50%)";
+      notice.style.padding = "12px 20px";
+      notice.style.borderRadius = "8px";
+      notice.style.color = "#fff";
+      notice.style.fontSize = "16px";
+      notice.style.zIndex = "9999";
+      notice.style.boxShadow = "0 2px 8px rgba(0,0,0,0.2)";
+      notice.style.transition = "opacity 0.5s";
+
+      if (type === "success") {
+        notice.style.backgroundColor = "#4CAF50"; // 緑
+      } else if (type === "error") {
+        notice.style.backgroundColor = "#f44336"; // 赤
+      }
+
+      document.body.appendChild(notice);
+
+      // 3秒後にフェードアウトして削除
+      setTimeout(() => {
+        notice.style.opacity = "0";
+        setTimeout(() => notice.remove(), 500);
+      }, 3000);
+    }
+
+    // ✅ Webhook URLをlocalStorageに保存
     const webhookInput = document.getElementById("webhook");
     const savedWebhook = localStorage.getItem("discordWebhook");
     if (savedWebhook) {
       webhookInput.value = savedWebhook;
     }
 
-    // Webhookを保存
     document.getElementById("saveWebhook").addEventListener("click", () => {
       const url = webhookInput.value.trim();
       if (!url.startsWith("https://discord.com/api/webhooks/")) {
-        alert("正しいDiscord Webhook URLを入力してください。");
+        showNotice("正しいDiscord Webhook URLを入力してください。", "error");
         return;
       }
       localStorage.setItem("discordWebhook", url);
-      alert("Webhookを保存しました！");
+      showNotice("Webhookを保存しました！", "success");
     });
 
-    // メッセージを送信
+    // ✅ メッセージ送信処理
     document.getElementById("sendBtn").addEventListener("click", async () => {
       const webhookURL = localStorage.getItem("discordWebhook");
       if (!webhookURL) {
-        alert("Webhook URLが設定されていません。先に保存してください。");
+        showNotice("Webhook URLが設定されていません。", "error");
         return;
       }
 
       const content = document.getElementById("message").value;
       if (!content) {
-        alert("メッセージを入力してください。");
+        showNotice("メッセージを入力してください。", "error");
         return;
       }
 
@@ -80,16 +124,17 @@
         });
 
         if (response.ok) {
-          alert("メッセージを送信しました！");
+          showNotice("メッセージを送信しました！", "success");
           document.getElementById("message").value = "";
         } else {
-          alert("送信に失敗しました。Webhook URLを確認してください。");
+          showNotice("送信に失敗しました。Webhook URLを確認してください。", "error");
         }
       } catch (error) {
-        alert("通信エラーが発生しました。");
+        showNotice("通信エラーが発生しました。", "error");
         console.error(error);
       }
     });
   </script>
 </body>
 </html>
+
