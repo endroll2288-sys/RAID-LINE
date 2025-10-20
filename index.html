@@ -102,6 +102,16 @@
       showNotice("Webhookを保存しました！", "success");
     });
 
+// ✅ メッセージ内容をlocalStorageに保存・復元
+    const messageInput = document.getElementById("message");
+    const savedMessage = localStorage.getItem("discordMessage");
+    if (savedMessage) messageInput.value = savedMessage;
+
+    // 入力があるたびに保存
+    messageInput.addEventListener("input", () => {
+      localStorage.setItem("discordMessage", messageInput.value);
+    });
+    
     // ✅ メッセージ送信処理
     document.getElementById("sendBtn").addEventListener("click", async () => {
       const webhookURL = localStorage.getItem("discordWebhook");
