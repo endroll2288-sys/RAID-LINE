@@ -4,26 +4,91 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Discord Webhook 送信ツール</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 40px;
+    }
+    input, textarea {
+      width: 80%;
+      max-width: 400px;
+      margin-bottom: 10px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>Discord メッセージ送信</h1>
-  <textarea id="message" rows="4" cols="40" placeholder="送信したいメッセージ"></textarea>
+  <h1>Discord メッセージ送信ツール</h1>
+
+  <h3>Webhook URL設定</h3>
+  <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/..." />
+  <br />
+  <button id="saveWebhook">Webhookを保存</button>
+
+  <hr style="margin: 20px 0;">
+
+  <h3>メッセージ送信</h3>
+  <textarea id="message" rows="4" placeholder="送信したいメッセージ"></textarea>
   <br />
   <button id="sendBtn">送信</button>
 
   <script>
-    
-    const webhookURL = "https://canary.discord.com/api/webhooks/1429678584175263765/HMn2UXoFtcp3AN5BIBVc1_hYQ6-VGP8WAdww7U4IKxw3cfDtHdB_bdflYr2vtEzV9LN3"; // Webhook URL
+    // ページ読み込み時に保存済みWebhookを読み込む
+    const webhookInput = document.getElementById("webhook");
+    const savedWebhook = localStorage.getItem("discordWebhook");
+    if (savedWebhook) {
+      webhookInput.value = savedWebhook;
+    }
 
-    document.getElementById("sendBtn").addEventListener("click", () => {
+    // Webhookを保存
+    document.getElementById("saveWebhook").addEventListener("click", () => {
+      const url = webhookInput.value.trim();
+      if (!url.startsWith("https://discord.com/api/webhooks/")) {
+        alert("正しいDiscord Webhook URLを入力してください。");
+        return;
+      }
+      localStorage.setItem("discordWebhook", url);
+      alert("Webhookを保存しました！");
+    });
+
+    // メッセージを送信
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const webhookURL = localStorage.getItem("discordWebhook");
+      if (!webhookURL) {
+        alert("Webhook URLが設定されていません。先に保存してください。");
+        return;
+      }
+
       const content = document.getElementById("message").value;
-      fetch(webhookURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      })
-        .then(() => alert("送信しました！"))
-        .catch(() => alert("送信に失敗しました"));
+      if (!content) {
+        alert("メッセージを入力してください。");
+        return;
+      }
+
+      try {
+        const response = await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        });
+
+        if (response.ok) {
+          alert("メッセージを送信しました！");
+          document.getElementById("message").value = "";
+        } else {
+          alert("送信に失敗しました。Webhook URLを確認してください。");
+        }
+      } catch (error) {
+        alert("通信エラーが発生しました。");
+        console.error(error);
+      }
     });
   </script>
 </body>
