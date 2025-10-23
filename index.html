@@ -53,6 +53,10 @@
   <br />
   <button id="sendBtn">送信</button>
 
+   <h3>連投回数指定</h3>
+<input type="text" id="loop" placeholder="繰り返し回数"　value="1">
+
+
   <script>
     // ✅ 通知メッセージ表示関数
     function showNotice(text, type = "success") {
@@ -114,12 +118,17 @@
     
     // ✅ メッセージ送信処理
     document.getElementById("sendBtn").addEventListener("click", async () => {
+
+      
       const webhookURL = localStorage.getItem("discordWebhook");
       if (!webhookURL) {
         showNotice("Webhook URLが設定されていません。", "error");
         return;
       }
 
+      const loop = document.getElementById("loop").value;
+
+      
       const content = document.getElementById("message").value;
       if (!content) {
         showNotice("メッセージを入力してください。", "error");
@@ -127,6 +136,8 @@
       }
 
       try {
+
+        for(let i=0;i<loop;i++){
         const response = await fetch(webhookURL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -137,6 +148,7 @@
           showNotice("メッセージを送信しました！", "success");
           //document.getElementById("message").value = "";
         } 
+        }
       } catch (error) {
         showNotice("通信エラーが発生しました。", "error");
         console.error(error);
